@@ -25,11 +25,11 @@ int read_line(FILE *file, char *str) {
     perror("Cannot read line from NULL file");
     return 1;
   }
-  if (malloc_usable_size(str) < MAX_LINE_LENGTH) {
-    perror("Allocated size of str is too small");
+  if (str == NULL) {
+    perror("str is NULL");
     return 1;
   }
-  if (fgets(str, MAX_LINE_LENGTH, file) == NULL) {
+  if (fgets(str, sizeof(char) * MAX_LINE_LENGTH, file) == NULL) {
     strcpy(str, "");
     return 1;
   }

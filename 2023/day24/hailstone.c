@@ -15,18 +15,18 @@ void print_hailstone(Hailstone h) {
 }
 
 void parse_all_hailstones(FILE *fp, Hailstone **hs, int *hs_capacity, int *hs_size, int *line_count) {
-  char *line = malloc(MAX_LINE_LENGTH);
-  strcpy(line, "");
-  Hailstone *h = calloc(1, sizeof(Hailstone));
+  char *line = malloc(sizeof(char) * (MAX_LINE_LENGTH + 1)); // 1 more for '\0'
+  Hailstone h;
 
   read_line(fp, line);
-  while (parse_hailstone(line, h) == 1) {
+  while (parse_hailstone(line, &h) == 1) {
     // Reallocate array of hailstones when capacity reached
     if (*hs_size >= *hs_capacity) {
-      Hailstone **new_hs;
-      if ((new_hs = realloc(hs, *hs_capacity+BATCH_SIZE)) != NULL) {
-        hs = new_hs;
-        *hs_capacity += BATCH_SIZE;
+      Hailstone *new_hs;
+      int new_capacity = *hs_capacity + BATCH_SIZE;
+      if ((new_hs = realloc(*hs, sizeof(Hailstone) * new_capacity)) != NULL) {
+        *hs = new_hs;
+        *hs_capacity = new_capacity;
       } else {
         perror("Could not realloc hs");
         break;
@@ -34,16 +34,14 @@ void parse_all_hailstones(FILE *fp, Hailstone **hs, int *hs_capacity, int *hs_si
     }
 
     // Push parsed hailstone
-    hs[*hs_size] = malloc(sizeof(Hailstone));
-    memcpy(hs[*hs_size], h, sizeof(Hailstone));
+    (*hs)[*hs_size] = h;
     printf("Pushed hailstone %d:", *line_count);
-    print_hailstone(*hs[*hs_size]);
-    (*hs_size)++;
+    print_hailstone((*hs)[*hs_size]);
+    *hs_size = *hs_size + 1;
 
     read_line(fp, line);
-    (*line_count)++;
+    *line_count = *line_count + 1;
   }
 
   free(line);
-  free(h);
 }
